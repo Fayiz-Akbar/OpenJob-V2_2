@@ -15,11 +15,12 @@ class CacheService {
     this._client.connect();
   }
 
-  async set(key, value, expirationInSecond = 1800) {
-    await this._client.set(key, value, {
-      EX: expirationInSecond,
-    });
-  }
+  // Di src/services/redis/CacheService.js
+async set(key, value, expirationInSecond = 3600) { // Ubah 1800 jadi 3600
+  await this._client.set(key, value, {
+    EX: expirationInSecond,
+  });
+}
 
   async get(key) {
     const result = await this._client.get(key);

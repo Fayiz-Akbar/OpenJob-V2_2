@@ -28,20 +28,22 @@ const init = async () => {
     try {
       if (message !== null) {
         const payload = JSON.parse(message.content.toString());
-        const applicationId = payload.applicationId;
+        const applicationId = payload.application_id; // Menggunakan snake_case sesuai payload
 
         console.log(`[Consumer] Menerima lamaran baru dengan ID: ${applicationId}`);
 
         const query = {
           text: `SELECT 
                    a.created_at, 
-                   u.name AS applicant_name, 
-                   u.email AS applicant_email, 
-                   (SELECT email FROM users WHERE id != a.user_id ORDER BY created_at ASC LIMIT 1) AS owner_email,
+                   u_applicant.name AS applicant_name, 
+                   u_applicant.email AS applicant_email, 
+                   u_owner.email AS owner_email,
                    j.title AS job_title
                  FROM applications a
-                 JOIN users u ON a.user_id = u.id
+                 JOIN users u_applicant ON a.user_id = u_applicant.id
                  JOIN jobs j ON a.job_id = j.id
+                 JOIN companies c ON j.company_id = c.id
+                 JOIN users u_owner ON c.owner_id = u_owner.id
                  WHERE a.id = $1`,
           values: [applicationId],
         };

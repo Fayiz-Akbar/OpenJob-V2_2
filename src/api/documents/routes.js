@@ -11,11 +11,12 @@ const documentsService = new DocumentsService();
 
 router.post('/', verifyToken, (req, res, next) => {
   upload.single('document')(req, res, (err) => {
-    if (err) {
-      return res.status(400).json({ status: 'failed', message: err.message });
-    }
-    next();
-  });
+  if (err) {
+    // Pastikan status 400. Jika error bawaan multer, err.message mungkin adalah 'File too large'
+    return res.status(400).json({ status: 'failed', message: err.message });
+  }
+  next();
+});
 }, async (req, res, next) => {
   try {
     if (!req.file) {

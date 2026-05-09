@@ -23,7 +23,7 @@ class ApplicationsHandler {
 
       const applicationId = await this._service.addApplication({ userId, jobId });
 
-      await ProducerService.sendMessage('applications', JSON.stringify({ applicationId }));
+      await ProducerService.sendMessage('applications', JSON.stringify({ application_id: applicationId }));
 
       res.status(201).json({
         status: 'success',

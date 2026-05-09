@@ -13,11 +13,19 @@ class CompaniesHandler {
   async postCompanyHandler(req, res, next) {
     try {
       this._validator.validateCompanyPayload(req.body);
-      const companyId = await this._service.addCompany(req.body);
+      const { name, location, description } = req.body;
+      
+      // Ambil ID user dari payload token (lewat middleware auth)
+      const ownerId = req.user.id; 
+
+      // Kirim ownerId ke service
+      const companyId = await this._service.addCompany({ name, location, description, ownerId });
 
       res.status(201).json({
         status: 'success',
-        data: { id: companyId },
+        data: {
+          companyId,
+        },
       });
     } catch (error) {
       next(error);

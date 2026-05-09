@@ -23,23 +23,25 @@ class UsersHandler {
     }
   }
 
-  async getUserByIdHandler(req, res, next) {
-    try {
-      const { id } = req.params;
-      const { source, user } = await this._service.getUserById(id);
+   async getUserByIdHandler(req, res, next) {
+  try {
+    const { id } = req.params;
+    const { source, user } = await this._service.getUserById(id);
 
-      if (source === 'cache') {
-        res.header('X-Data-Source', 'cache');
-      }
-
-      res.status(200).json({
-        status: 'success',
-        data: user,
-      });
-    } catch (error) {
-      next(error);
+    // Tambahkan header ini
+    if (source === 'cache') {
+      res.header('X-Data-Source', 'cache');
     }
+
+    res.status(200).json({
+      status: 'success',
+      data: { user },
+    });
+  } catch (error) {
+    next(error);
   }
 }
+}
+
 
 module.exports = UsersHandler;

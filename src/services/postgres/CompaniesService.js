@@ -9,13 +9,16 @@ class CompaniesService {
     this._cacheService = cacheService;
   }
 
-  async addCompany({ name, location, description }) {
+  // Tambahkan ownerId di dalam parameter destructuring
+  async addCompany({ name, location, description, ownerId }) {
     const id = `company-${nanoid(16)}`;
     const createdAt = new Date().toISOString();
 
     const query = {
-      text: 'INSERT INTO companies VALUES($1, $2, $3, $4, $5, $6) RETURNING id',
-      values: [id, name, location, description, createdAt, createdAt],
+      // Tambahkan $7 di VALUES
+      text: 'INSERT INTO companies VALUES($1, $2, $3, $4, $5, $6, $7) RETURNING id',
+      // Sisipkan ownerId di posisi kedua sesuai urutan kolom tabel
+      values: [id, ownerId, name, location, description, createdAt, createdAt],
     };
 
     const result = await this._pool.query(query);
