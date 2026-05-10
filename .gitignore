@@ -1,5 +1,7 @@
 node_modules/
 Openjob_api/node_modules/
+openjob_consumer/node_modules/
 
 .env
 Openjob_api/.env
+Openjob_consumer/.env
