@@ -42,7 +42,27 @@ class ApplicationsService {
   }
 
   async getApplications() {
-    const result = await this._pool.query('SELECT * FROM applications');
+    const query = `
+      SELECT 
+        a.id, 
+        a.user_id, 
+        a.job_id, 
+        a.status, 
+        a.created_at, 
+        a.updated_at,
+        j.title, 
+        j.job_type, 
+        j.experience_level, 
+        j.location_type, 
+        j.location_city, 
+        j.company_id,
+        c.name AS company_name
+      FROM applications a
+      JOIN jobs j ON a.job_id = j.id
+      JOIN companies c ON j.company_id = c.id
+    `;
+    
+    const result = await this._pool.query(query);
     return result.rows;
   }
 

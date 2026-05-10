@@ -17,8 +17,7 @@ class ApplicationsHandler {
   async postApplicationHandler(req, res, next) {
     try {
       this._validator.validatePostApplicationPayload(req.body);
-      
-      const { jobId } = req.body;
+      const { job_id: jobId } = req.body; 
       const userId = req.user.id; 
 
       const applicationId = await this._service.addApplication({ userId, jobId });
@@ -27,7 +26,12 @@ class ApplicationsHandler {
 
       res.status(201).json({
         status: 'success',
-        data: { applicationId }, 
+        data: { 
+          id: applicationId,
+          user_id: userId,
+          job_id: jobId,
+          status: 'pending'
+        }, 
       });
     } catch (error) {
       next(error);
@@ -47,25 +51,27 @@ class ApplicationsHandler {
   }
 
   async getApplicationByIdHandler(req, res, next) {
-    try {
-      const { id } = req.params;
-      const { source, application } = await this._service.getApplicationById(id);
+  try {
+    const { id } = req.params;
+    const { source, application } = await this._service.getApplicationById(id);
 
-
-      res.status(200).json({
-        status: 'success',
-        data: application,
-      });
-    } catch (error) {
-      next(error);
-    }
+    res.header('X-Data-Source', source); //
+    
+    res.status(200).json({
+      status: 'success',
+      data: application, // - Jangan dibungkus { application }
+    });
+  } catch (error) {
+    next(error);
   }
+}
 
   async getApplicationsByUserIdHandler(req, res, next) {
     try {
       const { userId } = req.params;
       const { source, applications } = await this._service.getApplicationsByUserId(userId);
 
+      res.header('X-Data-Source', source); // <--- TAMBAHKAN INI
 
       res.status(200).json({
         status: 'success',
@@ -81,6 +87,7 @@ class ApplicationsHandler {
       const { jobId } = req.params;
       const { source, applications } = await this._service.getApplicationsByJobId(jobId);
 
+      res.header('X-Data-Source', source); // <--- TAMBAHKAN INI
 
       res.status(200).json({
         status: 'success',

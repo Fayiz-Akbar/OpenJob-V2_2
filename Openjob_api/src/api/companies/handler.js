@@ -50,7 +50,7 @@ class CompaniesHandler {
       
       res.status(200).json({
         status: 'success',
-        data: { company }, // <--- UBAH BAGIAN INI, BUNGKUS DENGAN KURUNG KURAWAL
+        data: company, 
       });
     } catch (error) {
       next(error);

@@ -31,6 +31,8 @@ class BookmarksHandler {
       const userId = req.user.id;
       const { source, bookmarks } = await this._service.getBookmarksByUserId(userId);
 
+      res.header('X-Data-Source', source); // <--- TAMBAHKAN INI
+
       res.status(200).json({
         status: 'success',
         data: { bookmarks },

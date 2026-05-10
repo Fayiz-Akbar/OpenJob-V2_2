@@ -34,8 +34,33 @@ class BookmarksService {
       const result = await this._cacheService.get(`bookmarks:${userId}`);
       return { source: 'cache', bookmarks: JSON.parse(result) };
     } catch (error) {
+      // PERBAIKAN: Melakukan JOIN untuk mengambil tepat 18 kolom
       const query = {
-        text: 'SELECT * FROM bookmarks WHERE user_id = $1',
+        text: `
+          SELECT 
+            b.id, 
+            b.user_id, 
+            b.job_id, 
+            b.created_at, 
+            b.updated_at,
+            j.company_id, 
+            j.category_id, 
+            j.title, 
+            j.description, 
+            j.job_type, 
+            j.experience_level, 
+            j.location_type, 
+            j.location_city, 
+            j.salary_min, 
+            j.salary_max, 
+            j.is_salary_visible, 
+            j.status, 
+            c.name AS company_name 
+          FROM bookmarks b
+          JOIN jobs j ON b.job_id = j.id
+          JOIN companies c ON j.company_id = c.id
+          WHERE b.user_id = $1
+        `,
         values: [userId],
       };
       const result = await this._pool.query(query);

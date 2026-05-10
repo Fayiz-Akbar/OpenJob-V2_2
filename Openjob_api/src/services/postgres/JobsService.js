@@ -37,8 +37,23 @@ class JobsService {
   }
 
   async getJobs(title, companyName) {
+    // PERBAIKAN: Sebutkan 13 kolom secara spesifik. 
+    // Kita mengambil 12 kolom dari tabel jobs dan 1 kolom company_name dari tabel companies.
     let queryText = `
-      SELECT j.*, c.name AS company_name 
+      SELECT 
+        j.id, 
+        j.company_id, 
+        j.category_id, 
+        j.title, 
+        j.description, 
+        j.job_type, 
+        j.experience_level, 
+        j.location_type, 
+        j.location_city, 
+        j.salary_min, 
+        j.salary_max, 
+        j.is_salary_visible, 
+        c.name AS company_name 
       FROM jobs j
       JOIN companies c ON j.company_id = c.id
       WHERE 1=1

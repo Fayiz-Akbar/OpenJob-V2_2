@@ -27,7 +27,7 @@ class CategoriesService {
   }
 
   async getCategories() {
-    const result = await this._pool.query('SELECT id, name FROM categories');
+    const result = await this._pool.query('SELECT id, name, created_at, updated_at FROM categories');
     return result.rows;
   }
 
