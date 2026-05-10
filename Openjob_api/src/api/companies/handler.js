@@ -14,19 +14,16 @@ class CompaniesHandler {
     try {
       this._validator.validateCompanyPayload(req.body);
       const { name, location, description } = req.body;
-      
-      // Ambil ID user dari payload token (lewat middleware auth)
       const ownerId = req.user.id; 
 
-      // Kirim ownerId ke service
       const companyId = await this._service.addCompany({ name, location, description, ownerId });
 
       res.status(201).json({
-  status: 'success',
-  data: {
-    id: companyId,
-  },
-});
+        status: 'success',
+        data: {
+          id: companyId, // <--- UBAH BAGIAN INI DARI companyId MENJADI id: companyId
+        },
+      });
     } catch (error) {
       next(error);
     }
@@ -47,15 +44,13 @@ class CompaniesHandler {
   async getCompanyByIdHandler(req, res, next) {
     try {
       const { id } = req.params;
-      // Tangkap sumber (source) dan detail perusahaan (company)
       const { source, company } = await this._service.getCompanyById(id);
 
-      // Berikan custom header sesuai kriteria Dicoding
       res.header('X-Data-Source', source);
-
+      
       res.status(200).json({
         status: 'success',
-        data: company, 
+        data: { company }, // <--- UBAH BAGIAN INI, BUNGKUS DENGAN KURUNG KURAWAL
       });
     } catch (error) {
       next(error);

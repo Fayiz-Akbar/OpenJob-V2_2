@@ -71,7 +71,7 @@ const authenticationsService = new AuthenticationsService();
 const authenticationsHandler = new AuthenticationsHandler(authenticationsService, usersService, TokenManager, AuthenticationsValidator);
 app.use('/authentications', authenticationsRoutes(authenticationsHandler));
 
-const companiesService = new CompaniesService(cacheService);
+const companiesService = new CompaniesService(pool, cacheService);
 const companiesHandler = new CompaniesHandler(companiesService, CompaniesValidator);
 app.use('/companies', companiesRoutes(companiesHandler));
 

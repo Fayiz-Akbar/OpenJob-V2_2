@@ -27,7 +27,8 @@ class CompaniesService {
   }
 
   async getCompanies() {
-  const result = await this._pool.query('SELECT id, name, location FROM companies');
+  // BENAR: Menampilkan 6 kolom persis sesuai V2 (menghindari owner_id)
+  const result = await this._pool.query('SELECT id, name, location, description, created_at, updated_at FROM companies');
   return result.rows;
 }
 
