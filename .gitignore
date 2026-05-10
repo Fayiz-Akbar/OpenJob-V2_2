@@ -1,4 +1,5 @@
+node_modules/
+Openjob_api/node_modules/
+
 .env
-.env.local
-.env.development
-.env.production
+Openjob_api/.env
