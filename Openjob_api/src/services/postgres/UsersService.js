@@ -46,20 +46,34 @@ class UsersService {
     }
   }
 
-  async getUserByIdHandler(req, res, next) {
+  // 👇 INI YANG BARU: Fungsi untuk mengambil data User (dengan Redis)
+  async getUserById(id) {
     try {
-      const { id } = req.params;
-      const user = await this._service.getUserById(id);
-
-      res.status(200).json({
-        status: 'success',
-        data: { user },
-      });
+      // Coba ambil data dari Redis Cache terlebih dahulu
+      const result = await this._cacheService.get(`users:${id}`);
+      return { user: JSON.parse(result), source: 'cache' };
     } catch (error) {
-      next(error);
+      // Jika tidak ada di cache (error di-throw oleh CacheService), ambil dari Postgres
+      const query = {
+        text: 'SELECT id, name, email, role FROM users WHERE id = $1',
+        values: [id],
+      };
+
+      const result = await this._pool.query(query);
+
+      // Jika Id tidak valid / tidak ada
+      if (!result.rowCount) {
+        throw new NotFoundError('User tidak ditemukan');
+      }
+
+      const user = result.rows[0];
+
+      // Simpan ke Cache selama 1 jam (3600 detik) sesuai syarat "Skilled"
+      await this._cacheService.set(`users:${id}`, JSON.stringify(user), 3600);
+
+      return { user, source: 'database' };
     }
   }
-
 
   async verifyUserCredential(email, password) {
     const query = {

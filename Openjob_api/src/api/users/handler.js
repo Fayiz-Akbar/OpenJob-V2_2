@@ -26,17 +26,21 @@ class UsersHandler {
   async getUserByIdHandler(req, res, next) {
     try {
       const { id } = req.params;
-      const user = await this._service.getUserById(id);
+      
+      // Ambil nilai user dan source (cache/database) dari Service
+      const { user, source } = await this._service.getUserById(id);
+
+      // Set header kustom X-Data-Source sesuai kriteria Postman
+      res.header('X-Data-Source', source);
 
       res.status(200).json({
         status: 'success',
-        data: { user },
+        data: user, // Ubah dari { user } menjadi user
       });
     } catch (error) {
-      next(error);
+      next(error); // Error dari NotFoundError akan diarahkan menjadi 404
     }
   }
 }
-
 
 module.exports = UsersHandler;

@@ -1,15 +1,13 @@
-const { Pool } = require('pg');
 const { nanoid } = require('nanoid');
 const InvariantError = require('../../exceptions/InvariantError');
 const NotFoundError = require('../../exceptions/NotFoundError');
 
 class CompaniesService {
-  constructor(cacheService) {
-    this._pool = new Pool();
+  constructor(pool, cacheService) {
+    this._pool = pool; 
     this._cacheService = cacheService;
   }
 
-  // Sudah ditambahkan parameter ownerId untuk fitur email RabbitMQ
   async addCompany({ name, location, description, ownerId }) {
     const id = `company-${nanoid(16)}`;
     const createdAt = new Date().toISOString();
@@ -29,30 +27,38 @@ class CompaniesService {
   }
 
   async getCompanies() {
-    // Sesuai V1, get all hanya menampilkan 3 kolom
-    const result = await this._pool.query('SELECT id, name, location FROM companies');
-    return result.rows;
-  }
+  const result = await this._pool.query('SELECT id, name, location FROM companies');
+  return result.rows;
+}
 
   async getCompanyById(id) {
     try {
       const result = await this._cacheService.get(`company:${id}`);
-      return { source: 'cache', company: JSON.parse(result) };
+      
+      if (result !== null) { 
+          return { source: 'cache', company: JSON.parse(result) };
+      }
+      
+      throw new Error('Cache miss');
     } catch (error) {
       const query = {
-        // PERBAIKAN: Hanya mengambil 6 kolom spesifik (menghindari kolom owner_id ikut terbawa)
-        text: 'SELECT id, name, location, description, created_at, updated_at FROM companies WHERE id = $1',
+        // TIPS: Postman terkadang mengekspektasikan format camelCase (createdAt, updatedAt)
+        // Kita alias-kan langsung di query SQL agar lebih aman
+        text: 'SELECT id, name, location, description, created_at AS "createdAt", updated_at AS "updatedAt" FROM companies WHERE id = $1',
         values: [id],
       };
+      
       const result = await this._pool.query(query);
 
       if (!result.rowCount) {
         throw new NotFoundError('Company tidak ditemukan');
       }
 
-      await this._cacheService.set(`company:${id}`, JSON.stringify(result.rows[0]));
+      const company = result.rows[0];
 
-      return { source: 'database', company: result.rows[0] };
+      await this._cacheService.set(`company:${id}`, JSON.stringify(company), 3600);
+
+      return { source: 'database', company };
     }
   }
 
